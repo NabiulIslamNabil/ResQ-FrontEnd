@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Add in pubspec.yaml
+// Add in pubspec.yaml
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
