@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resq_front_end/report_incident.dart';
 import 'landing_page.dart';
 
 void main() {
@@ -49,7 +50,7 @@ class ResQApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
       ),
-      home: const LandingPage(),
+      home: const ReportIncidentPage(),
     );
   }
 }
