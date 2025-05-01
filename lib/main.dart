@@ -50,7 +50,7 @@ class ResQApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
       ),
-      home: const ReportIncidentPage(),
+      home: const LandingPage(),
     );
   }
 }
