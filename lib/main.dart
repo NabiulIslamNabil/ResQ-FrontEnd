@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:resq_front_end/report_incident.dart';
 import 'landing_page.dart';
+import 'civilian_dashboard.dart';
 
 void main() {
   runApp(const ResQApp());
@@ -12,19 +12,24 @@ class ResQApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'ResQ',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.redAccent,
-          primary: Colors.redAccent,
-          secondary: Colors.white,
           brightness: Brightness.light,
         ),
-        useMaterial3: true,
         fontFamily: 'Roboto',
         textTheme: const TextTheme(
-          headlineMedium: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent),
-          bodyMedium: TextStyle(fontSize: 16, color: Colors.black87),
+          headlineMedium: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.redAccent,
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -32,9 +37,12 @@ class ResQApp extends StatelessWidget {
             foregroundColor: Colors.white,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 32,
+            ),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
@@ -47,10 +55,17 @@ class ResQApp extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
           floatingLabelStyle: const TextStyle(color: Colors.redAccent),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
         ),
       ),
-      home: const LandingPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LandingPage(),
+        '/civilian_dashboard': (context) => const CivilianDashboard(),
+      },
     );
   }
 }

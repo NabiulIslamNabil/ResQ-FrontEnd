@@ -33,7 +33,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
@@ -81,7 +84,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           CircleAvatar(
                             backgroundColor: themeColor.withOpacity(0.1),
                             radius: 45,
-                            child: Icon(Icons.lock_rounded, size: 40, color: themeColor),
+                            child: Icon(
+                              Icons.lock_rounded,
+                              size: 40,
+                              color: themeColor,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           const Text(
@@ -106,12 +113,18 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                             elevation: 5,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 25,
+                              ),
                               child: Form(
                                 key: _formKey,
                                 child: Column(
                                   children: [
-                                    buildTextField("Email", Icons.email_outlined),
+                                    buildTextField(
+                                      "Email",
+                                      Icons.email_outlined,
+                                    ),
                                     buildPasswordField("Password"),
                                     Row(
                                       children: [
@@ -132,17 +145,27 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: themeColor,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                          horizontal: 80,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30),
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
                                         ),
                                       ),
                                       onPressed: () {
-                                        if (_formKey.currentState?.validate() ?? false) {
+                                        if (_formKey.currentState?.validate() ??
+                                            false) {
                                           _formKey.currentState?.save();
-                                          print(formData);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text("Login Successful!")),
+
+                                          // 🔗 Placeholder for backend auth
+                                          // TODO: Connect to backend to verify credentials
+
+                                          Navigator.pushReplacementNamed(
+                                            context,
+                                            '/civilian_dashboard',
                                           );
                                         }
                                       },
@@ -155,7 +178,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           const SizedBox(height: 25),
 
                           // Social login
-                          const Text("— Or sign in with —", style: TextStyle(color: Colors.grey)),
+                          const Text(
+                            "— Or sign in with —",
+                            style: TextStyle(color: Colors.grey),
+                          ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -238,7 +264,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             borderSide: BorderSide.none,
           ),
         ),
-        validator: (value) => value == null || value.isEmpty ? "Please enter $label" : null,
+        validator:
+            (value) =>
+                value == null || value.isEmpty ? "Please enter $label" : null,
         onSaved: (value) => formData[label] = value,
       ),
     );
@@ -252,7 +280,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
         child: Icon(icon, color: color, size: 30),
       ),
