@@ -1,25 +1,57 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class CivilianDashboard extends StatefulWidget {
   const CivilianDashboard({super.key});
+
   @override
   State<CivilianDashboard> createState() => _CivilianDashboardState();
 }
 
-class _CivilianDashboardState extends State<CivilianDashboard> {
+class _CivilianDashboardState extends State<CivilianDashboard> with TickerProviderStateMixin {
   String _location = 'Fetching location...';
   late Timer _timer;
   final String _userFullName = 'Jonathan Wilson';
   bool _showLocation = false;
+  late AnimationController _sosController;
+
+  final List<Map<String, dynamic>> incidents = [
+    {
+      "area": "Sector 5",
+      "type": "Fire",
+      "victims": 3,
+      "status": "Rescued",
+      "image": "assets/firefighter.png",
+    },
+    {
+      "area": "Zone 9",
+      "type": "Flood",
+      "victims": 5,
+      "status": "Ongoing",
+      "image": "assets/logo.png",
+    },
+    {
+      "area": "Area X",
+      "type": "Gas Leak",
+      "victims": 2,
+      "status": "Rescued",
+      "image": "assets/logo.png",
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
     _initializeLocationUpdates();
+    _sosController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
   }
 
   Future<void> _initializeLocationUpdates() async {
@@ -74,128 +106,153 @@ class _CivilianDashboardState extends State<CivilianDashboard> {
     }
   }
 
+  List<PieChartSectionData> buildChartData() {
+    final Map<String, int> typeCounts = {};
+    for (var i in incidents) {
+      typeCounts[i["type"]] = (typeCounts[i["type"]] ?? 0) + 1;
+    }
+    final colors = [Colors.redAccent, Colors.blueAccent, Colors.orange];
+    int index = 0;
+
+    return typeCounts.entries.map((entry) {
+      final color = colors[index++ % colors.length];
+      return PieChartSectionData(
+        color: color,
+        value: entry.value.toDouble(),
+        title: '',
+        radius: 30,
+      );
+    }).toList();
+  }
+
   @override
   void dispose() {
     _timer.cancel();
+    _sosController.dispose();
     super.dispose();
-  }
-
-  void _showEmergencyPopup() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Report Emergency As:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.remove_red_eye),
-              label: const Text('Spectator'),
-              onPressed: () {
-                // Navigate to SpectatorPage
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.person),
-              label: const Text('Victim'),
-              onPressed: () {
-                // Navigate to VictimPage
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showUserInfoDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Account Details'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('👤 Full Name: $_userFullName'),
-            const SizedBox(height: 10),
-            Text('📍 Current Location: $_location'),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFE5E5), Color(0xFFFFCDD2)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.account_circle, size: 32, color: Colors.redAccent),
+      backgroundColor: const Color(0xFFFDECEC),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  CircleAvatar(radius: 30, backgroundColor: Colors.white, child: Icon(Icons.person, size: 30)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_userFullName, style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold)),
+                        if (_showLocation)
+                          Text("📍 $_location",
+                              style: GoogleFonts.lato(fontSize: 13, color: Colors.black87)),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _showUserInfoDialog,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_userFullName,
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-                            const SizedBox(height: 4),
-                            AnimatedOpacity(
-                              opacity: _showLocation ? 1.0 : 0.0,
-                              duration: const Duration(milliseconds: 800),
-                              child: Text('📍 $_location',
-                                  style: const TextStyle(fontSize: 14, color: Colors.black54)),
-                            ),
-                          ],
+                  ),
+                  IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Incident Widget
+              const Text("📢 Live Incident Feed", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              CarouselSlider(
+                items: incidents.map((i) {
+                  final bgColor = i["type"] == "Fire"
+                      ? Colors.red.shade100
+                      : i["type"] == "Flood"
+                          ? Colors.blue.shade100
+                          : Colors.orange.shade100;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(i["image"], width: 60),
                         ),
-                      ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Area: ${i["area"]}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text("Type: ${i["type"]}"),
+                              Text("Victims: ${i["victims"]}"),
+                              Text("Status: ${i["status"]}"),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.black54),
-                      onPressed: () {},
-                    )
-                  ],
+                  );
+                }).toList(),
+                options: CarouselOptions(autoPlay: true, height: 130),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Donut Chart
+              const Text("🧭 Today's Incident Summary", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Center(
+                child: SizedBox(
+                  height: 160,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PieChart(PieChartData(
+                        sections: buildChartData(),
+                        centerSpaceRadius: 40,
+                        sectionsSpace: 2,
+                      )),
+                      Text("${incidents.length}",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 30),
-                Center(
+              ),
+
+              const SizedBox(height: 20),
+
+              // Buttons
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  _buildActionButton(Icons.map, "View Map", () {}),
+                  _buildActionButton(Icons.local_hospital, "Ambulance", () {}),
+                  _buildActionButton(Icons.local_police, "Call Police", () {}),
+                  _buildActionButton(Icons.refresh, "Refresh Location", _fetchLocation),
+                ],
+              ),
+
+              const SizedBox(height: 30),
+
+              // Emergency Button
+              Center(
+                child: ScaleTransition(
+                  scale: Tween(begin: 1.0, end: 1.1)
+                      .animate(CurvedAnimation(parent: _sosController, curve: Curves.easeInOut)),
                   child: GestureDetector(
-                    onTap: _showEmergencyPopup,
+                    onTap: () => _showEmergencyPopup(),
                     child: Container(
-                      width: 250,
-                      height: 250,
+                      width: 200,
+                      height: 200,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
@@ -204,102 +261,63 @@ class _CivilianDashboardState extends State<CivilianDashboard> {
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.5),
-                            blurRadius: 30,
-                            spreadRadius: 8,
-                          ),
+                          BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 30, spreadRadius: 5),
                         ],
                       ),
                       child: const Center(
-                        child: Text(
-                          'EMERGENCY\nREPORTING',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1),
-                        ),
+                        child: Text('EMERGENCY\nREPORTING',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.map_outlined),
-                      label: const Text("View Map"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        elevation: 6,
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _fetchLocation,
-                      icon: const Icon(Icons.gps_fixed),
-                      label: const Text("Refresh Location"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        elevation: 6,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.local_hospital),
-                  label: const Text("Call Ambulance"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    elevation: 10,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                const Text(
-                  "🔔 Live Alerts",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: PageView(
-                    children: const [
-                      Card(
-                        margin: EdgeInsets.all(12),
-                        child: ListTile(
-                          leading: Icon(Icons.warning, color: Colors.redAccent),
-                          title: Text("Fire reported in Sector 5"),
-                          subtitle: Text("Evacuation in progress"),
-                        ),
-                      ),
-                      Card(
-                        margin: EdgeInsets.all(12),
-                        child: ListTile(
-                          leading: Icon(Icons.flood, color: Colors.blueAccent),
-                          title: Text("Flood warning issued"),
-                          subtitle: Text("Rising water levels in Zone 9"),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, String label, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.redAccent,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        elevation: 6,
+      ),
+    );
+  }
+
+  void _showEmergencyPopup() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Report Emergency As:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.remove_red_eye),
+            label: const Text('Spectator'),
+            onPressed: () {}, // TODO
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.person),
+            label: const Text('Victim'),
+            onPressed: () {}, // TODO
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+          ),
+        ]),
       ),
     );
   }
